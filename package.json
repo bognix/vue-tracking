@@ -32,6 +32,9 @@
     "rules": {},
     "parserOptions": {
       "parser": "babel-eslint"
+    },
+    "globals": {
+      "ga": "readonly"
     }
   },
   "postcss": {

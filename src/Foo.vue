@@ -3,10 +3,7 @@
     <router-link to="/">
       <img alt="Vue logo" src="./assets/logo.png">
     </router-link>
-    <router-link to="/foo">
-      Go to Foo page
-    </router-link>
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <HelloWorld msg="Foo page"/>
   </div>
 </template>
 
