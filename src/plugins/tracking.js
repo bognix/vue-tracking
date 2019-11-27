@@ -31,7 +31,7 @@ const loadScript = (url) => {
   })
 }
 
-const track = (category, action, label) => {
+const track = ({category, action, label}) => {
   if (typeof ga === 'function') {
     ga('send', 'event', category, action, label);
   }
@@ -45,17 +45,42 @@ const trackPageView = () => {
 
 const install = async (Vue, { router }) => {
   const queue = lazyQueue();
-  await loadScript('https://www.google-analytics.com/analytics.js')
-  ga('create', process.env.GA_TRACKING, 'auto');
-  queue.start()
 
-  Vue.prototype.$gaTrack = (...args) => {
-    queue.push(() => track(...args))
+  Vue.prototype.$gaTrack = (payload) => {
+    queue.push(() => track(payload))
   };
 
   router.afterEach(() => {
     queue.push(trackPageView);
   });
+
+  const listeners = {}
+
+  Vue.directive('track', {
+    bind(el, { arg: event, value }, vnode) {
+      if (vnode.componentInstance) {
+        vnode.componentInstance.$on(event, () => {
+          track(value);
+        });
+      } else {
+        listeners[el] = () => {
+          track(value);
+        }
+        el.addEventListener(event, listeners[el])
+      }
+    },
+    unbind(el, { arg: event }, vnode) {
+      if (vnode.componentInstance) {
+        vnode.componentInstance.$off(event);
+      } else {
+        el.removeEventListener(event, listeners[el])
+      }
+    }
+  });
+
+  await loadScript('https://www.google-analytics.com/analytics.js');
+  ga('create', process.env.VUE_APP_GA_TRACKING, 'auto');
+  queue.start();
 }
 
 export default {
